@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-Powered E-Commerce Store</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+    font-family:'Segoe UI',sans-serif;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    min-height:100vh;
+}
+
+/* HEADER */
+.header{
+    background:white;
+    padding:20px 40px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    position:sticky;
+    top:0;
+    z-index:1000;
+    box-shadow:0 10px 30px rgba(0,0,0,.15);
+}
+.logo h1{
+    font-size:28px;
+    background:linear-gradient(135deg,#4ecdc4,#44a08d);
+    
+    -webkit-text-fill-color:black;
+}
+.user-info{display:flex;gap:15px;align-items:center}
+.notification,button{
+    padding:10px 18px;
+    border-radius:30px;
+    border:none;
+    cursor:pointer;
+    font-weight:600;
+}
+.notification{background:#4ecdc4;color:white}
+button{background:#ef4444;color:white}
+
+/* MAIN */
+.main-content{max-width:1400px;margin:40px auto;padding:0 20px}
+.search-section{
+    background:white;
+    padding:40px;
+    border-radius:20px;
+    text-align:center;
+    margin-bottom:40px;
+}
+.search-box{
+    width:100%;
+    max-width:600px;
+    padding:16px;
+    border-radius:30px;
+    border:2px solid #ddd;
+    font-size:16px;
+}
+
+/* PRODUCTS */
+.products-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:30px;
+}
+.product-card{
+    background:white;
+    padding:25px;
+    border-radius:20px;
+    cursor:pointer;
+    box-shadow:0 15px 35px rgba(0,0,0,.1);
+    transition:.3s;
+}
+.product-card:hover{transform:translateY(-8px)}
+.product-image{font-size:60px;text-align:center}
+.product-name{font-size:20px;font-weight:700;margin:10px 0}
+.product-price{color:#4ecdc4;font-size:22px;font-weight:700}
+.product-category{
+    font-size:13px;
+    background:#667eea;
+    color:white;
+    padding:4px 12px;
+    border-radius:20px;
+    display:inline-block;
+    margin:8px 0;
+}
+.product-desc{color:#666;font-size:14px;margin-bottom:12px}
+.product-tags span{
+    font-size:11px;
+    background:#f0f0f0;
+    padding:4px 8px;
+    border-radius:12px;
+    margin-right:5px;
+}
+.add-to-cart{
+    width:100%;
+    margin-top:12px;
+    padding:12px;
+    border-radius:25px;
+    background:#4ecdc4;
+    color:white;
+    font-weight:600;
+    border:none;
+}
+.add-to-cart:hover{background:#44a08d}
+
+/* CART */
+#cartDrawer{
+    position:fixed;
+    top:0;
+    right:-400px;
+    width:380px;
+    height:100%;
+    background:white;
+    box-shadow:-10px 0 30px rgba(0,0,0,.3);
+    padding:20px;
+    transition:.4s;
+    z-index:3000;
+    overflow-y:auto;
+}
+
+/* MODAL */
+#productModal{
+    display:none;
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    background:rgba(0,0,0,.6);
+    z-index:4000;
+    justify-content:center;
+    align-items:center;
+}
+.modal-box{
+    background:white;
+    padding:35px;
+    border-radius:20px;
+    max-width:500px;
+}
+
+/* CHECKOUT */
+#checkoutPage{
+    display:none;
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    background:#f8fafc;
+    z-index:5000;
+    padding:40px;
+    overflow:auto;
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+    <div class="logo"><h1>🛒 AI E-Commerce</h1></div>
+    <div class="user-info">
+        <div class="notification" onclick="toggleCart()">🛒 Cart (<span id="cartCount">0</span>)</div>
+        <button class="sumit"onclick="sumbitAdmin()">Admin Login</button>
+    </div>
+</header>
+
+<div class="main-content">
+
+<div class="search-section">
+    <h2>🔍 Browse Products</h2><br>
+    <input class="search-box" id="searchInput" placeholder="Search products…">
+</div>
+
+<div class="search-section">
+    <h2>🤖 AI Recommended For You</h2>
+    <div class="products-grid" id="recommendedGrid"></div>
+</div>
+
+<div class="products-grid" id="productsGrid"></div>
+
+</div>
+
+<!-- CART -->
+<div id="cartDrawer">
+<h2>🛒 Your Cart</h2><hr><br>
+<div id="cartItems"></div>
+<h3>Total: ₹<span id="cartTotal">0</span></h3>
+<button style="width:100%;margin-top:15px" onclick="goToCheckout()">Checkout</button>
+<button style="width:100%;margin-top:10px;background:#6b7280" onclick="toggleCart()">Close</button>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div id="productModal">
+<div class="modal-box">
+<h2 id="modalName"></h2><br>
+<p id="modalDesc"></p><br>
+<strong id="modalPrice"></strong><br><br>
+<button onclick="closeModal()">Close</button>
+</div>
+</div>
+
+<!-- CHECKOUT -->
+<div id="checkoutPage">
+<h2>💳 Checkout</h2><br>
+<div id="checkoutItems"></div>
+<h3>Total Payable: ₹<span id="checkoutTotal">0</span></h3><br>
+<button onclick="placeOrder()">Place Order</button>
+<button style="background:#6b7280;margin-left:10px" onclick="closeCheckout()">Cancel</button>
+</div>
+
+<script>
+const products = [
+
+/* ================= ELECTRONICS ================= */
+{ id: 1, name: "Sony WH-1000XM5 Headphones", price: 29990, category: "Electronics", tags: ["audio","headphones","wireless"], image: "🎧", description: "Industry-leading noise cancellation with 30-hour battery." },
+{ id: 2, name: "Bose QuietComfort Ultra", price: 34990, category: "Electronics", tags: ["audio","premium"], image: "🎧", description: "Immersive sound with spatial audio." },
+{ id: 3, name: "Apple AirPods Pro (2nd Gen)", price: 24900, category: "Electronics", tags: ["earbuds","apple"], image: "🎶", description: "Adaptive transparency & spatial audio." },
+{ id: 4, name: "Samsung Galaxy S24 Ultra", price: 129999, category: "Electronics", tags: ["smartphone","5g"], image: "📱", description: "200MP camera with Galaxy AI." },
+{ id: 5, name: "iPhone 16 Pro Max", price: 144900, category: "Electronics", tags: ["iphone","apple"], image: "📱", description: "A18 Pro chip with titanium design." },
+{ id: 6, name: "Dell XPS 15 Laptop", price: 189990, category: "Electronics", tags: ["laptop","work"], image: "💻", description: "Ultra-thin premium laptop." },
+{ id: 7, name: "MacBook Air M3", price: 114900, category: "Electronics", tags: ["laptop","apple"], image: "💻", description: "Fast M3 chip with all-day battery." },
+{ id: 8, name: "Sony PlayStation 5", price: 54990, category: "Electronics", tags: ["gaming","console"], image: "🎮", description: "Next-gen gaming console." },
+{ id: 9, name: "Xbox Series X", price: 52990, category: "Electronics", tags: ["gaming","console"], image: "🎮", description: "Powerful 4K gaming console." },
+{ id: 10, name: "Canon EOS R50 Camera", price: 71990, category: "Electronics", tags: ["camera","photography"], image: "📸", description: "Mirrorless camera for creators." },
+
+/* ================= WEARABLES ================= */
+{ id: 11, name: "Apple Watch Series 9", price: 45900, category: "Wearables", tags: ["smartwatch","fitness"], image: "⌚", description: "Advanced health tracking." },
+{ id: 12, name: "Samsung Galaxy Watch 6", price: 36999, category: "Wearables", tags: ["health","android"], image: "⌚", description: "Sleep coaching & body composition." },
+{ id: 13, name: "Fitbit Charge 6", price: 13995, category: "Wearables", tags: ["fitness","tracker"], image: "📊", description: "7-day battery with ECG." },
+{ id: 14, name: "Noise ColorFit Pro 5", price: 3999, category: "Wearables", tags: ["budget","fitness"], image: "⌚", description: "AMOLED display smartwatch." },
+{ id: 15, name: "Garmin Forerunner 255", price: 32999, category: "Wearables", tags: ["running","gps"], image: "⌚", description: "Advanced running metrics." },
+
+/* ================= COSMETICS ================= */
+{ id: 16, name: "Lakmé 9to5 Primer", price: 599, category: "Cosmetics", tags: ["makeup","primer"], image: "💄", description: "Smooth makeup base." },
+{ id: 17, name: "MAC Ruby Woo Lipstick", price: 2450, category: "Cosmetics", tags: ["lipstick","premium"], image: "💋", description: "Iconic matte red." },
+{ id: 18, name: "Maybelline Fit Me Foundation", price: 549, category: "Cosmetics", tags: ["foundation","makeup"], image: "🧴", description: "Natural finish foundation." },
+{ id: 19, name: "The Ordinary Niacinamide", price: 950, category: "Cosmetics", tags: ["skincare","serum"], image: "💧", description: "Reduces blemishes & pores." },
+{ id: 20, name: "Minimalist SPF 50 Sunscreen", price: 399, category: "Cosmetics", tags: ["sunscreen","skincare"], image: "🌞", description: "PA++++ protection." },
+
+/* ================= FASHION ================= */
+{ id: 21, name: "Zara Floral Maxi Dress", price: 5990, category: "Fashion", tags: ["dress","women"], image: "👗", description: "Elegant summer wear." },
+{ id: 22, name: "H&M Oversized Hoodie", price: 2499, category: "Fashion", tags: ["hoodie","casual"], image: "🧥", description: "Comfort everyday hoodie." },
+{ id: 23, name: "Nike Air Max 270", price: 12995, category: "Fashion", tags: ["shoes","sports"], image: "👟", description: "Iconic air cushioning." },
+{ id: 24, name: "Adidas Ultraboost", price: 17999, category: "Fashion", tags: ["running","sports"], image: "👟", description: "Energy-return running shoes." },
+{ id: 25, name: "Levi’s 511 Slim Jeans", price: 3999, category: "Fashion", tags: ["jeans","men"], image: "👖", description: "Classic slim fit denim." },
+
+/* ================= HOME & APPLIANCES ================= */
+{ id: 26, name: "Dyson V15 Vacuum Cleaner", price: 68900, category: "Home", tags: ["vacuum","cleaning"], image: "🧹", description: "Laser dust detection." },
+{ id: 27, name: "Philips Air Fryer", price: 12999, category: "Home", tags: ["kitchen","cooking"], image: "🍟", description: "Oil-free frying." },
+{ id: 28, name: "LG Double Door Refrigerator", price: 55999, category: "Home", tags: ["fridge","appliance"], image: "🧊", description: "Smart inverter fridge." },
+{ id: 29, name: "IFB Front Load Washing Machine", price: 34990, category: "Home", tags: ["washing","appliance"], image: "🧺", description: "Energy efficient washing." },
+{ id: 30, name: "Mi Robot Vacuum Mop", price: 24999, category: "Home", tags: ["robot","cleaning"], image: "🤖", description: "Smart home cleaning robot." },
+
+/* ================= ACCESSORIES ================= */
+{ id: 31, name: "boAt Power Bank 20000mAh", price: 1799, category: "Accessories", tags: ["powerbank","mobile"], image: "🔋", description: "Fast charging power bank." },
+{ id: 32, name: "Logitech Wireless Mouse", price: 1299, category: "Accessories", tags: ["mouse","office"], image: "🖱️", description: "Silent clicks mouse." },
+{ id: 33, name: "Laptop Backpack", price: 2499, category: "Accessories", tags: ["bag","travel"], image: "🎒", description: "Water-resistant backpack." },
+{ id: 34, name: "Samsung 1TB SSD", price: 8999, category: "Accessories", tags: ["storage","ssd"], image: "💾", description: "High-speed portable SSD." },
+{ id: 35, name: "Anker USB-C Hub", price: 3499, category: "Accessories", tags: ["usb","office"], image: "🔌", description: "Multi-port USB-C hub." }
+
+];
+
+
+let filtered=[...products];
+let cart=JSON.parse(localStorage.getItem("cart")||"[]");
+let prefs=JSON.parse(localStorage.getItem("prefs")||"{}");
+
+function renderProducts(){
+productsGrid.innerHTML=filtered.map(p=>`
+<div class="product-card" onclick="openDetails(${p.id})">
+<div class="product-image">${p.image}</div>
+<div class="product-name">${p.name}</div>
+<div class="product-price">₹${p.price}</div>
+<div class="product-category">${p.category}</div>
+<div class="product-desc">${p.description}</div>
+<button class="add-to-cart" onclick="addToCart(event,${p.id})">Add to Cart</button>
+</div>`).join("");
+}
+renderProducts();
+
+searchInput.oninput=e=>{
+const q=e.target.value.toLowerCase();
+filtered=products.filter(p=>p.name.toLowerCase().includes(q));
+renderProducts();
+};
+
+function addToCart(e,id){
+e.stopPropagation();
+const product=products.find(p=>p.id===id);
+cart.push(product);
+localStorage.setItem("cart",JSON.stringify(cart));
+updateCartUI();
+trackPref(product.category);
+updateRecommendations(product);
+}
+
+function removeFromCart(i){
+cart.splice(i,1);
+localStorage.setItem("cart",JSON.stringify(cart));
+updateCartUI();
+}
+
+function updateCartUI(){
+cartCount.textContent=cart.length;
+let total=0;
+cartItems.innerHTML=cart.map((p,i)=>{
+total+=p.price;
+return `<div style="display:flex;justify-content:space-between;margin-bottom:10px">
+${p.name} - ₹${p.price}
+<button onclick="removeFromCart(${i})">❌</button>
+</div>`;
+}).join("");
+cartTotal.textContent=total;
+}
+updateCartUI();
+
+function toggleCart(){
+cartDrawer.style.right=cartDrawer.style.right==="0px"?"-400px":"0px";
+}
+
+function openDetails(id){
+const p=products.find(x=>x.id===id);
+modalName.textContent=p.name;
+modalDesc.textContent=p.description;
+modalPrice.textContent="₹"+p.price;
+productModal.style.display="flex";
+trackPref(p.category);
+updateRecommendations(p);
+}
+
+function closeModal(){productModal.style.display="none"}
+
+function trackPref(cat){
+prefs[cat]=(prefs[cat]||0)+1;
+localStorage.setItem("prefs",JSON.stringify(prefs));
+}
+
+function updateRecommendations(clicked){
+const rec=products.filter(p=>p.category===clicked.category&&p.id!==clicked.id).slice(0,3);
+recommendedGrid.innerHTML=rec.map(p=>`
+<div class="product-card" onclick="openDetails(${p.id})">
+<div class="product-image">${p.image}</div>
+<div class="product-name">${p.name}</div>
+<div class="product-price">₹${p.price}</div>
+<button class="add-to-cart" onclick="addToCart(event,${p.id})">❤️ Similar</button>
+</div>`).join("");
+}
+
+function goToCheckout(){
+checkoutItems.innerHTML=cart.map(p=>`<p>${p.name} - ₹${p.price}</p>`).join("");
+checkoutTotal.textContent=cart.reduce((s,p)=>s+p.price,0);
+checkoutPage.style.display="block";
+}
+
+function closeCheckout(){checkoutPage.style.display="none"}
+
+function placeOrder(){
+alert("✅ Order placed successfully!");
+cart=[];
+localStorage.removeItem("cart");
+updateCartUI();
+closeCheckout();
+toggleCart();
+}
+function sumbitAdmin(){
+    window.location.href='admin_login.html'
+}
+</script>
+
+</body>
+</html>

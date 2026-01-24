@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AWS AI Marketing Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; 
+        }
+
+        .header { 
+            background: rgba(255,255,255,0.95); 
+            padding: 20px 40px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo h1 { 
+            color: #333; 
+            font-size: 28px; 
+            -webkit-text-fill-color: black;
+        }
+
+        .user-info { 
+            display: flex; 
+            align-items: center; 
+            gap: 20px; 
+        }
+
+        .user-avatar { 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 50%; 
+            background: linear-gradient(135deg, #4ecdc4, #44a08d); 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: bold; 
+            font-size: 18px;
+        }
+
+        .logout-btn { 
+            background: #ff6b6b; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(255,107,107,0.4);
+        }
+
+        .dashboard { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding: 40px 20px; 
+        }
+
+        .welcome-section { 
+            text-align: center; 
+            margin-bottom: 50px; 
+            color: white; 
+        }
+
+        .welcome-section h2 { 
+            font-size: 36px; 
+            margin-bottom: 15px; 
+        }
+
+        /* Metrics Grid */
+        .metrics-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 25px; 
+            margin-bottom: 50px; 
+        }
+
+        .metric-card { 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 20px; 
+            padding: 35px 25px; 
+            text-align: center; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+
+        .metric-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .metric-number { 
+            font-size: 42px; 
+            font-weight: bold;
+            
+            -webkit-text-fill-color: black;
+            margin-bottom: 10px;
+        }
+
+        .metric-label { 
+            color: #666; 
+            font-size: 16px; 
+            font-weight: 500;
+        }
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .nav-link {
+            padding: 12px 24px;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            background: rgba(102,126,234,0.1);
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .nav-link.active {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255,107,107,0.3);
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255,107,107,0.4);
+        }
+
+        /* Action Cards */
+        .action-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+            gap: 30px; 
+            margin-bottom: 50px; 
+        }
+
+        .action-card { 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 20px; 
+            padding: 40px 30px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-top: 4px solid transparent;
+        }
+
+        .action-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+
+        .action-card.personalized { border-top-color: #4ecdc4; }
+        .action-card.campaigns { border-top-color: #ff6b6b; }
+        .action-card.analytics { border-top-color: #f9ca24; }
+        .action-card.notifications { border-top-color: #667eea; }
+
+        .action-icon {
+            font-size: 56px;
+            margin-bottom: 20px;
+        }
+
+        .action-card h3 { 
+            color: #333; 
+            font-size: 24px; 
+            margin-bottom: 15px; 
+        }
+
+        .action-card p { 
+            color: #666; 
+            margin-bottom: 25px; 
+            line-height: 1.6;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102,126,234,0.4);
+        }
+
+        /* Recent Activity */
+        .activity-section {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .activity-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            font-size: 20px;
+            margin-right: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .header { padding: 15px 20px; flex-direction: column; gap: 15px; }
+            .dashboard { padding: 20px 15px; }
+            .welcome-section h2 { font-size: 28px; }
+            .action-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <h1>🧠 AWS AI Marketing Dashboard</h1>
+            </div>
+         <div class="nav-links">
+                <a href="/admin_home.html" class="nav-link">🏠 Home</a>
+                <a href="/dashboard.html" class="nav-link active">📊 Dashboard</a>
+                <a href="/campaign.html" class="nav-link">🚀 Campaign</a>
+                <a href="/campaign_history.html" class="nav-link">📋 History</a>
+                <a href="/logout" class="logout-btn">Logout</a>
+            </div>
+    </header>
+
+    <div class="dashboard">
+        <div class="welcome-section">
+            <h2>Welcome back, LATHA!</h2>
+            <p>Your personalized marketing dashboard - Powered by AWS AI</p>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">📊</div>
+                <div class="metric-number">89.4%</div>
+                <div class="metric-label">Engagement Rate</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">💰</div>
+                <div class="metric-number">$124,750</div>
+                <div class="metric-label">Revenue Generated</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">🎯</div>
+                <div class="metric-number">23.7%</div>
+                <div class="metric-label">Conversion Rate</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">👥</div>
+                <div class="metric-number">12,847</div>
+                <div class="metric-label">Active Users</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">📱</div>
+                <div class="metric-number">2.4M</div>
+                <div class="metric-label">Messages Delivered</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">⚡</div>
+                <div class="metric-number">47</div>
+                <div class="metric-label">Active Campaigns</div>
+            </div>
+        </div>
+
+        <!-- Action Cards -->
+        <div class="action-grid">
+            <div class="action-card personalized" onclick="viewPersonalized()">
+                <div class="action-icon">🎯</div>
+                <h3>Personalized Offers</h3>
+                <p>AI-powered recommendations based on EC2 customer behavior analysis from DynamoDB</p>
+                <button class="action-btn">View Offers</button>
+            </div>
+            <div class="action-card campaigns" onclick="manageCampaigns()">
+                <div class="action-icon">🚀</div>
+                <h3>Campaign Manager</h3>
+                <p>Create, launch, and track personalized campaigns across all channels</p>
+                <button class="action-btn">Manage Campaigns</button>
+            </div>
+            
+            <div class="action-card notifications" onclick="notificationSettings()">
+                <div class="action-icon">📱</div>
+                <h3>Notification Settings</h3>
+                <p>Configure SNS delivery preferences for email, SMS, and push notifications</p>
+                <button class="action-btn">Update Settings</button>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="activity-section">
+            <h3 style="color: #333; margin-bottom: 25px; font-size: 24px;">Recent Activity</h3>
+            <div class="activity-list">
+                <div class="activity-item">
+                    <span><span class="activity-icon">🎯</span> Personalized offer sent for wireless headphones</span>
+                    <span>2 mins ago</span>
+                </div>
+                <div class="activity-item">
+                    <span><span class="activity-icon">📧</span> Abandoned cart campaign delivered (1,247 users)</span>
+                    <span>15 mins ago</span>
+                </div>
+                <div class="activity-item">
+                    <span><span class="activity-icon">📊</span> Engagement rate improved to 89.4%</span>
+                    <span>1 hour ago</span>
+                </div>
+                <div class="activity-item">
+                    <span><span class="activity-icon">💰</span> $5,247 revenue from conversions</span>
+                    <span>3 hours ago</span>
+                </div>
+                <div class="activity-item">
+                    <span><span class="activity-icon">👥</span> New customer segment created</span>
+                    <span>5 hours ago</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = 'index.html';
+            }
+        }
+function goToHome() {
+            window.location.href = 'admin_home.html';
+        }
+        function viewPersonalized() {
+            alert('Loading personalized offers from DynamoDB... (AWS EC2 AI Models)');
+        }
+
+        function manageCampaigns() {
+            alert('Opening campaign manager... (Connect to AWS backend)');
+        }
+
+        function viewAnalytics() {
+            alert('Loading real-time analytics dashboard...');
+        }
+
+        function notificationSettings() {
+            alert('Configuring SNS notification preferences...');
+        }
+
+        <!-- Add this to the metrics-grid section in dashboard.html -->
+
+// Auto-sync with campaign.html
+function updateMetrics() {
+    const metrics = JSON.parse(localStorage.getItem('dashboardMetrics') || '{}');
+    const campaigns = JSON.parse(localStorage.getItem('aiCampaigns') || '[]');
+    
+    document.querySelector('.stat-number:nth-of-type(6)').textContent = campaigns.length || 0; // Active Campaigns
+    document.querySelector('.stat-number:nth-of-type(5)').textContent = campaigns.filter(c => c.status === 'Deployed').reduce((sum, c) => sum + (c.sent || 0), 0).toLocaleString() || '0'; // Messages Sent
+}
+
+// Call on page load
+updateMetrics();
+
+
+    </script>
+</body>
+</html>

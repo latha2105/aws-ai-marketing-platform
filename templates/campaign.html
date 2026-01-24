@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Campaign Generator - AWS AI Marketing Platform</title>
+    <style>
+        /* [Previous CSS remains same - keeping it short] */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .header { background: rgba(255,255,255,0.95); padding: 20px 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .logo h1 { color: #333; font-size: 24px; }
+        .nav-buttons { display: flex; gap: 15px; align-items: center; }
+        .back-btn, .logout-btn { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
+        .back-btn:hover, .logout-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+        .main-content { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .page-title { text-align: center; color: white; margin-bottom: 40px; }
+        .page-title h2 { font-size: 36px; margin-bottom: 10px; }
+        .ai-generator { background: rgba(255,255,255,0.95); border-radius: 24px; padding: 50px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); margin-bottom: 40px; }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 40px; }
+        .form-group label { display: block; margin-bottom: 10px; color: #333; font-weight: 600; }
+        .form-group input, .form-group select { width: 100%; padding: 18px; border: 2px solid #e9ecef; border-radius: 16px; font-size: 16px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #4ecdc4; box-shadow: 0 0 0 4px rgba(78,205,196,0.1); }
+        .generate-btn { width: 100%; padding: 22px; background: linear-gradient(135deg, #4ecdc4, #44a08d); color: white; border: none; border-radius: 20px; font-size: 20px; font-weight: 700; cursor: pointer; grid-column: 1/-1; }
+        .ai-output { background: linear-gradient(135deg, rgba(78,205,196,0.1), rgba(68,160,141,0.1)); border: 2px solid #4ecdc4; border-radius: 20px; padding: 40px; margin-top: 30px; display: none; }
+        .ai-output.show { display: block; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo"><h1>🤖 AI Campaign Generator</h1></div>
+        <div class="nav-buttons">
+            <button class="back-btn" onclick="goBack()">← Dashboard</button>
+            <button class="back-btn" onclick="goBack()">← History</button>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="page-title">
+            <h2>AI-Powered Campaign Generation</h2>
+            <p>Auto-syncs to Dashboard & History</p>
+        </div>
+
+        <div class="ai-generator">
+            <form id="aiForm">
+                <div class="input-grid">
+                    <div class="form-group">
+                        <label>🎯 User Interests</label>
+                        <input type="text" id="userInterests" placeholder="e.g., wireless headphones, fitness trackers" required>
+                    </div>
+                    <div class="form-group">
+                        <label>👥 Customer Segment</label>
+                        <select id="customerSegment" required>
+                            <option value="">Select segment</option>
+                            <option value="new-users">New Users</option>
+                            <option value="abandoned-cart">Abandoned Cart</option>
+                            <option value="high-value">High Value Customers</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>📱 Channel</label>
+                        <select id="channel" required>
+                            <option value="">Select channel</option>
+                            <option value="email">Email</option>
+                            <option value="sms">SMS</option>
+                            <option value="push">Push</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="generate-btn">✨ Generate AI Campaign</button>
+            </form>
+
+            <div id="aiOutput" class="ai-output">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>✅ AI Campaign Generated!</h3>
+                    <button class="copy-btn" onclick="deployCampaign()" style="background: #4ecdc4; color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer;">🚀 Deploy via SNS</button>
+                </div>
+                <div id="campaignPreview" style="background: white; border-radius: 16px; padding: 30px;">
+                    <div id="campaignSubject" style="font-size: 22px; font-weight: 600; color: #333; margin-bottom: 20px;">Loading...</div>
+                    <div id="campaignBody" style="line-height: 1.8; color: #444;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Campaign Database (localStorage)
+        function getCampaigns() {
+            return JSON.parse(localStorage.getItem('aiCampaigns') || '[]');
+        }
+
+        function saveCampaign(campaign) {
+            const campaigns = getCampaigns();
+            campaign.id = Date.now();
+            campaign.date = new Date().toLocaleString();
+            campaign.status = 'Active';
+            campaigns.unshift(campaign);
+            localStorage.setItem('aiCampaigns', JSON.stringify(campaigns.slice(0, 50))); // Keep last 50
+        }
+
+        // AI Templates
+        const aiTemplates = {
+            'headphones': { subject: '🎧 25% OFF Wireless Headphones!', body: 'We noticed you love wireless headphones! Get 25% OFF + free shipping now!' },
+            'electronics': { subject: '⚡ Electronics Flash Sale!', body: '30% OFF chargers, cables & gadgets - Limited time offer!' },
+            'fitness': { subject: '🏃‍♂️ 20% OFF Fitness Trackers!', body: 'Track your goals with 20% OFF fitness trackers & smartwatches!' },
+            default: { subject: '🎯 Special Offer Just For You!', body: 'Exclusive deal based on your interests - Shop now!' }
+        };
+
+        document.getElementById('aiForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('.generate-btn');
+            const interests = document.getElementById('userInterests').value.toLowerCase();
+            const segment = document.getElementById('customerSegment').value;
+            const channel = document.getElementById('channel').value;
+
+            btn.innerHTML = '🧠 AI Processing...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                // AI Match interests to template
+                const matched = Object.keys(aiTemplates).find(key => interests.includes(key)) || 'default';
+                const template = aiTemplates[matched];
+                
+                const campaign = {
+                    subject: template.subject,
+                    body: template.body,
+                    interests: interests,
+                    segment: segment,
+                    channel: channel,
+                    sent: 0,
+                    opened: '0%',
+                    converted: '0%'
+                };
+
+                // Save to GLOBAL history
+                saveCampaign(campaign);
+                updateDashboardMetrics();
+                
+                // Display campaign
+                document.getElementById('campaignSubject').textContent = campaign.subject;
+                document.getElementById('campaignBody').innerHTML = campaign.body.replace(/\n/g, '<br>');
+                document.getElementById('aiOutput').classList.add('show');
+                
+                btn.innerHTML = '✨ New Campaign';
+                btn.disabled = false;
+            }, 2000);
+        });
+
+        function deployCampaign() {
+            const campaigns = getCampaigns();
+            const latest = campaigns[0];
+            latest.status = 'Deployed';
+            latest.sent = Math.floor(Math.random() * 2000) + 500;
+            latest.opened = Math.floor(Math.random() * 20 + 75) + '%';
+            latest.converted = Math.floor(Math.random() * 8 + 15) + '%';
+            localStorage.setItem('aiCampaigns', JSON.stringify(campaigns));
+            updateDashboardMetrics();
+            alert(`✅ Deployed to ${latest.sent} users via AWS SNS!`);
+        }
+
+        function updateDashboardMetrics() {
+            const campaigns = getCampaigns();
+            const totalCampaigns = campaigns.length;
+            const deployed = campaigns.filter(c => c.status === 'Deployed').length;
+            
+            // Update Dashboard metrics (sync across pages)
+            localStorage.setItem('dashboardMetrics', JSON.stringify({
+                totalCampaigns,
+                activeCampaigns: totalCampaigns - deployed,
+                deployedCampaigns: deployed
+            }));
+        }
+
+        function goBack() { window.location.href = 'dashboard.html'; }
+        function logout() { if(confirm('Logout?')) window.location.href = 'index.html'; }
+    </script>
+</body>
+</html>

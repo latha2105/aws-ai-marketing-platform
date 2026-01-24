@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - AWS AI Marketing Platform</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+    font-family:'Segoe UI',sans-serif;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    min-height:100vh;
+}
+
+/* NAV */
+.admin-nav{
+    background:white;
+    padding:15px 40px;
+    box-shadow:0 6px 20px rgba(0,0,0,.15);
+    position:sticky;
+    top:0;
+    z-index:1000;
+}
+.nav-container{
+    max-width:1400px;
+    margin:auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+.admin-logo h1{font-size:26px}
+.nav-links a{
+    margin-left:10px;
+    text-decoration:none;
+    padding:10px 18px;
+    border-radius:25px;
+    font-weight:600;
+    color:#333;
+}
+.nav-links a.active{
+    background:#ef4444;
+    color:white;
+}
+.logout-btn{
+    background:#ef4444;
+    color:white;
+}
+
+/* MAIN */
+.admin-dashboard{
+    max-width:1400px;
+    margin:40px auto;
+    padding:0 20px;
+}
+.welcome{
+    text-align:center;
+    color:white;
+    margin-bottom:40px;
+}
+.welcome h2{font-size:36px}
+
+/* METRICS */
+.metrics-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:30px;
+    margin-bottom:50px;
+}
+.metric-card{
+    background:white;
+    border-radius:20px;
+    padding:35px;
+    text-align:center;
+    box-shadow:0 15px 35px rgba(0,0,0,.15);
+}
+.metric-card h3{
+    font-size:40px;
+    margin-bottom:10px;
+}
+.metric-card p{color:#666}
+
+/* ACTIVITY */
+.activity-section{
+    background:white;
+    border-radius:20px;
+    padding:35px;
+    box-shadow:0 15px 35px rgba(0,0,0,.15);
+}
+.activity-item{
+    display:flex;
+    justify-content:space-between;
+    padding:15px 0;
+    border-bottom:1px solid #eee;
+}
+.activity-item:last-child{border-bottom:none}
+.badge{
+    padding:4px 10px;
+    border-radius:12px;
+    font-size:12px;
+    color:white;
+}
+.badge.active{background:#4ecdc4}
+.badge.deployed{background:#ef4444}
+</style>
+</head>
+
+<body>
+
+<!-- NAV -->
+<nav class="admin-nav">
+    <div class="nav-container">
+        <div class="admin-logo">
+            <h1>⚙️ Admin Dashboard</h1>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">🏠 Home</a>
+            <a href="admin_home.html" class="active">📊 Dashboard</a>
+            <a href="campaign.html">🚀 Campaign</a>
+            <a href="campaign_history.html">📋 History</a>
+            <a href="index.html" class="logout-btn">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<!-- MAIN -->
+<div class="admin-dashboard">
+
+<div class="welcome">
+    <h2>Admin Control Panel</h2>
+    <p>Real-time AI Campaign Monitoring</p>
+</div>
+
+<!-- METRICS -->
+<div class="metrics-grid">
+    <div class="metric-card">
+        <h3 id="totalCampaigns">0</h3>
+        <p>Total Campaigns</p>
+    </div>
+    <div class="metric-card">
+        <h3 id="activeCampaigns">0</h3>
+        <p>Active Campaigns</p>
+    </div>
+    <div class="metric-card">
+        <h3 id="deployedCampaigns">0</h3>
+        <p>Deployed Campaigns</p>
+    </div>
+    <div class="metric-card">
+        <h3 id="conversionRate">0%</h3>
+        <p>Avg Conversion Rate</p>
+    </div>
+</div>
+
+<!-- ACTIVITY -->
+<div class="activity-section">
+    <h2 style="margin-bottom:20px">📌 Recent Campaign Activity</h2>
+    <div id="recentActivity"></div>
+</div>
+
+</div>
+
+<script>
+function loadDashboard() {
+    const campaigns = JSON.parse(localStorage.getItem("aiCampaigns") || "[]");
+
+    const total = campaigns.length;
+    const deployed = campaigns.filter(c => c.status === "Deployed").length;
+    const active = total - deployed;
+
+    document.getElementById("totalCampaigns").textContent = total;
+    document.getElementById("activeCampaigns").textContent = active;
+    document.getElementById("deployedCampaigns").textContent = deployed;
+
+    // Avg conversion
+    if (campaigns.length > 0) {
+        const avg = campaigns.reduce((s,c)=>{
+            return s + parseInt(c.converted || 0);
+        },0) / campaigns.length;
+        document.getElementById("conversionRate").textContent = Math.round(avg) + "%";
+    }
+
+    loadRecentActivity(campaigns);
+}
+
+function loadRecentActivity(campaigns) {
+    const box = document.getElementById("recentActivity");
+
+    if (campaigns.length === 0) {
+        box.innerHTML = "<p>No campaigns created yet.</p>";
+        return;
+    }
+
+    box.innerHTML = campaigns.slice(0,5).map(c => `
+        <div class="activity-item">
+            <span>
+                <strong>${c.subject}</strong><br>
+                <small>${c.segment} • ${c.channel}</small>
+            </span>
+            <span>
+                <span class="badge ${c.status === "Deployed" ? "deployed" : "active"}">
+                    ${c.status}
+                </span><br>
+                <small>${c.date}</small>
+            </span>
+        </div>
+    `).join("");
+}
+
+document.addEventListener("DOMContentLoaded", loadDashboard);
+
+// Auto-sync if updated from another page
+window.addEventListener("storage", loadDashboard);
+</script>
+
+</body>
+</html>

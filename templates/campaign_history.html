@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaign History - AWS AI Marketing Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; 
+        }
+        .header { 
+            background: rgba(255,255,255,0.95); 
+            padding: 20px 40px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .logo h1 { 
+            color: #333; 
+            font-size: 24px; 
+            -webkit-text-fill-color: black;
+        }
+        .nav-buttons { display: flex; gap: 15px; align-items: center; }
+        .back-btn, .logout-btn { 
+            background: linear-gradient(135deg, #667eea, #764ba2); 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover, .logout-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+        .main-content { max-width: 1400px; margin: 40px auto; padding: 0 20px; }
+        .page-title { text-align: center; color: white; margin-bottom: 40px; }
+        .page-title h2 { font-size: 36px; margin-bottom: 10px; }
+        .filters-section { 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 20px; 
+            padding: 30px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+        .filters { display: flex; gap: 20px; flex-wrap: wrap; align-items: end; }
+        .filter-group { display: flex; flex-direction: column; gap: 8px; min-width: 180px; }
+        .filter-group label { font-weight: 600; color: #333; font-size: 14px; }
+        .filter-group input, .filter-group select { padding: 12px 16px; border: 2px solid #e9ecef; border-radius: 12px; font-size: 15px; }
+        .filter-btn { padding: 12px 28px; background: linear-gradient(135deg, #4ecdc4, #44a08d); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; }
+        .filter-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(78,205,196,0.4); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { text-align: center; padding: 25px; background: rgba(255,255,255,0.9); border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 36px; font-weight: bold; color: #4ecdc4; margin-bottom: 8px; }
+        .history-table-container { 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 20px; 
+            padding: 40px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            overflow-x: auto;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 15px; }
+        th, td { padding: 20px 16px; text-align: left; border-bottom: 1px solid #eee; }
+        th { 
+            background: linear-gradient(135deg, #667eea, #764ba2); 
+            color: white; 
+            font-weight: 600; 
+            position: sticky; 
+            top: 0; 
+            z-index: 10; 
+            font-size: 14px;
+        }
+        tr:hover { background: rgba(102,126,234,0.05); }
+        .status-badge { padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+        .status-active { background: linear-gradient(135deg, #4ecdc4, #44a08d); color: white; }
+        .status-deployed { background: linear-gradient(135deg, #f9ca24, #f7b733); color: white; }
+        .status-completed { background: #28a745; color: white; }
+        .no-data { text-align: center; padding: 60px; color: #666; font-size: 18px; }
+        @media (max-width: 768px) { 
+            .filters { flex-direction: column; align-items: stretch; }
+            .filter-group { min-width: auto; }
+            th, td { padding: 12px 8px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <h1>📋 AI Campaign History</h1>
+        </div>
+        <div class="nav-buttons">
+            <button class="back-btn" onclick="goBack()">← Dashboard</button>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="page-title">
+            <h2>Complete Campaign History</h2>
+            <p>All AI-generated campaigns synced from DynamoDB</p>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-section">
+            <h3 style="color: #333; margin-bottom: 25px; font-size: 22px;">🔍 Filters & Stats</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>Date Range</label>
+                        <input type="date" id="dateFilter">
+                    </div>
+                    <div class="filter-group">
+                        <label>Status</label>
+                        <select id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Deployed">Deployed</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Channel</label>
+                        <select id="channelFilter">
+                            <option value="">All Channels</option>
+                            <option value="email">Email</option>
+                            <option value="sms">SMS</option>
+                            <option value="push">Push</option>
+                        </select>
+                    </div>
+                    <button class="filter-btn" onclick="applyFilters()">Apply Filters</button>
+                    <button class="filter-btn" onclick="clearFilters()" style="background: #6c757d;">Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalCampaigns">0</div>
+                <div>Total Campaigns</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="deployedCampaigns">0</div>
+                <div>Deployed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalMessages">0</div>
+                <div>Total Messages</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avgEngagement">--</div>
+                <div>Avg Engagement</div>
+            </div>
+        </div>
+
+        <!-- History Table -->
+        <div class="history-table-container">
+            <h3 style="color: #333; margin-bottom: 25px; font-size: 24px;">📊 Campaign Performance</h3>
+            <table id="historyTable">
+                <thead>
+                    <tr>
+                        <th>Campaign</th>
+                        <th>Date Generated</th>
+                        <th>User Interests</th>
+                        <th>Segment</th>
+                        <th>Channel</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody">
+                    <tr>
+                        <td colspan="10" class="no-data">No campaigns yet. Generate your first AI campaign!</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Global campaign database sync
+        function getCampaigns() {
+            return JSON.parse(localStorage.getItem('aiCampaigns') || '[]');
+        }
+
+        function saveCampaigns(campaigns) {
+            localStorage.setItem('aiCampaigns', JSON.stringify(campaigns));
+        }
+
+        // Load and display campaigns
+        function loadCampaigns(filteredCampaigns = null) {
+            const campaigns = filteredCampaigns || getCampaigns();
+            const tbody = document.getElementById('historyBody');
+            
+            if (campaigns.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" class="no-data">No campaigns match your filters. <a href="campaign.html" style="color: #4ecdc4;">Generate new AI campaign →</a></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = campaigns.map(campaign => `
+                <tr>
+                    <td><strong>${campaign.subject || 'Untitled'}</strong></td>
+                    <td>${campaign.date || 'Just now'}</td>
+                    <td>${campaign.interests || 'General'}</td>
+                    <td>${campaign.segment || 'All'}</td>
+                    <td>${campaign.channel || 'Multi'}</td>
+                    <td><span class="status-badge status-${campaign.status?.toLowerCase()}">${campaign.status || 'Draft'}</span></td>
+        
+                </tr>
+            `).join('');
+        }
+
+        // Update stats
+        function updateStats() {
+            const campaigns = getCampaigns();
+            const deployed = campaigns.filter(c => c.status === 'Deployed');
+            
+            document.getElementById('totalCampaigns').textContent = campaigns.length;
+            document.getElementById('deployedCampaigns').textContent = deployed.length;
+            document.getElementById('totalMessages').textContent = deployed.reduce((sum, c) => sum + (c.sent || 0), 0).toLocaleString();
+            
+            const avgEngagement = deployed.length > 0 ? 
+                (deployed.reduce((sum, c) => sum + parseFloat(c.opened || 0), 0) / deployed.length).toFixed(1) + '%' : '--';
+            document.getElementById('avgEngagement').textContent = avgEngagement;
+        }
+
+        // Filter campaigns
+        function applyFilters() {
+            const dateFilter = document.getElementById('dateFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const channelFilter = document.getElementById('channelFilter').value;
+            
+            const campaigns = getCampaigns();
+            let filtered = campaigns;
+
+            if (dateFilter) {
+                filtered = filtered.filter(c => new Date(c.date) >= new Date(dateFilter));
+            }
+            if (statusFilter) {
+                filtered = filtered.filter(c => c.status === statusFilter);
+            }
+            if (channelFilter) {
+                filtered = filtered.filter(c => c.channel === channelFilter);
+            }
+
+            loadCampaigns(filtered);
+        }
+
+        function clearFilters() {
+            document.getElementById('dateFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('channelFilter').value = '';
+            loadCampaigns();
+            updateStats();
+        }
+
+        // Navigation
+        function goBack() { window.location.href = 'dashboard.html'; }
+        function logout() { if(confirm('Logout from admin?')) window.location.href = 'index.html'; }
+
+        // Initialize on page load
+        window.onload = function() {
+            loadCampaigns();
+            updateStats();
+        };
+    </script>
+</body>
+</html>
