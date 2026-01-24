@@ -10,18 +10,18 @@ import os
 app = Flask(__name__)
 app.secret_key = 'aws-ai-marketing-platform-2026-super-secret-key'
 
-# 🔥 AWS CONFIGURATION
+#  AWS CONFIGURATION
 REGION = 'us-east-1'
 dynamodb = boto3.resource('dynamodb', region_name=REGION)
 sns = boto3.client('sns', region_name=REGION)
 
-# 🔥 DYNAMODB TABLES (Create these 4 tables manually)
+#  DYNAMODB TABLES (Create these 4 tables manually)
 users_table = dynamodb.Table('Users')
 admin_table = dynamodb.Table('Admin')
 products_table = dynamodb.Table('Products')
 campaigns_table = dynamodb.Table('Campaigns')
 
-# 🔥 SNS TOPIC (Create SNS topic and get ARN)
+#  SNS TOPIC (Create SNS topic and get ARN)
 SNS_TOPIC_ARN = 'arn:aws:sns:us-east-1:YOUR-ACCOUNT-ID:marketing-notifications'
 
 def hash_password(password):
@@ -39,7 +39,7 @@ def send_sns_notification(subject, message):
     except Exception as e:
         print(f"❌ SNS Error: {e}")
 
-# 🔥 HOME PAGE & PRODUCT TRACKING
+#  HOME PAGE & PRODUCT TRACKING
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -83,7 +83,7 @@ def home():
 def about():
     return render_template('about.html')
 
-# 🔥 USER AUTHENTICATION
+#  USER AUTHENTICATION
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -135,7 +135,7 @@ def logout():
     flash('Logged out successfully!')
     return redirect(url_for('index'))
 
-# 🔥 ADMIN ROUTES
+# ADMIN ROUTES
 @app.route('/admin_login.html')
 @app.route('/admin_login', methods=['GET', 'POST'])
 def admin_login():
@@ -202,7 +202,7 @@ def dashboard():
                          messages_sent=sum(p.get('messages_sent', 0) for p in products),
                          conversion_rate=0)  # Calculate from analytics
 
-# 🔥 CAMPAIGN MANAGEMENT
+#  CAMPAIGN MANAGEMENT
 @app.route('/campaign.html')
 @app.route('/campaign')
 def campaign():
@@ -249,7 +249,7 @@ def create_campaign():
     
     return jsonify({'status': 'success', 'campaign_id': campaign_id})
 
-# 🔥 PRODUCTS ENDPOINTS
+#  PRODUCTS ENDPOINTS
 @app.route('/api/search_product', methods=['POST'])
 def search_product():
     data = request.json
@@ -285,4 +285,5 @@ if __name__ == '__main__':
     print("🚀 AWS Marketing Platform Starting...")
     print("📋 Required DynamoDB Tables: Users, Admin, Products, Campaigns")
     print("📱 SNS Topic ARN - Update SNS_TOPIC_ARN in code!")
+
     app.run(host='0.0.0.0', port=5000, debug=True)
