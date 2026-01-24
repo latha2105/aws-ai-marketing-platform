@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - AWS AI Marketing Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            padding: 15px 40px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo h2 {
+           
+            -webkit-text-fill-color: gray;
+            font-size: 24px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .admin-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .admin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 140px 20px 80px;
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 60px;
+            background: rgba(255,255,255,0.95);
+            padding: 50px;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .section h2 {
+            font-size: 36px;
+            background: linear-gradient(135deg, #8283c9, #0a080c);
+            -webkit-text-fill-color: whitesmoke;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Mission Section */
+        .mission-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .mission-badge {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(78, 205, 196, 0.3);
+        }
+
+        .mission-badge h3 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        /* Tech Stack */
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .tech-item {
+            background: rgba(255,255,255,0.8);
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            transform: translateY(-8px);
+            border-color: #667eea;
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .tech-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        /* AWS Services */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .service-card {
+            background: rgba(255,255,255,0.9);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .service-icon {
+            font-size: 52px;
+            margin-bottom: 20px;
+        }
+
+        /* Why AWS Section */
+        .why-aws-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .aws-point {
+            background: rgba(255,255,255,0.8);
+            padding: 25px;
+            border-radius: 16px;
+            border-left: 4px solid #4ecdc4;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(0,0,0,0.9);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 60px;
+        }
+
+        @media (max-width: 768px) {
+            .mission-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .container {
+                padding: 120px 15px 60px;
+            }
+            
+            .section {
+                padding: 30px 20px;
+            }
+            
+            .services-grid, .why-aws-points {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <h2>AWS AI Marketing</h2>
+            </div>
+            <div class="nav-links">
+                <a href="home.html" class="nav-link">Home</a>
+                <a href="about.html" class="nav-link active">About</a>
+                <a href="admin_home.html" class="nav-link admin-btn">Admin Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Mission Section -->
+        <section class="section">
+            <h2>🎯 Mission</h2>
+            <div class="mission-grid">
+                <div class="mission-badge">
+                    <h3>Transform Marketing</h3>
+                    <p>Deliver personalized campaigns that increase engagement by 300% and conversions by 89%</p>
+                </div>
+                <div>
+                    <p><strong>Our mission</strong> is to revolutionize marketing through AI-driven personalization, delivering the right message to the right customer at the right time. We aim to transform traditional campaigns into intelligent, data-informed experiences that drive measurable business results.</p>
+                    <br>
+                    <ul style="padding-left: 25px;">
+                        <li>🚀 Increase customer engagement & retention</li>
+                        <li>📈 Boost conversion rates significantly</li>
+                        <li>⚡ Enable real-time campaign delivery</li>
+                        <li>🌐 Scale globally with AWS cloud</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech Stack Section -->
+        <section class="section">
+            <h2>💻 Tech Stack</h2>
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <div class="tech-icon">☁️</div>
+                    <h3>AWS Cloud</h3>
+                    <p>EC2, DynamoDB, SNS, IAM</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🤖</div>
+                    <h3>Machine Learning</h3>
+                    <p>Customer behavior analysis & personalization models</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">⚡</div>
+                    <h3>Real-time Analytics</h3>
+                    <p>Live campaign performance tracking</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">📱</div>
+                    <h3>Multi-channel</h3>
+                    <p>Email, SMS, Push notifications</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🔐</div>
+                    <h3>Security</h3>
+                    <p>IAM roles & encrypted data storage</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">📊</div>
+                    <h3>Responsive UI</h3>
+                    <p>HTML5, CSS3, JavaScript</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- AWS Services Section -->
+        <section class="section">
+            <h2>☁️ AWS Services Architecture</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">🖥️</div>
+                    <h3>Amazon EC2</h3>
+                    <p>Compute instances running AI marketing models that analyze customer behavior patterns and generate personalized campaign recommendations in real-time.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">📊</div>
+                    <h3>Amazon DynamoDB</h3>
+                    <p>NoSQL database storing millions of customer profiles, behavioral data, and campaign metrics with millisecond response times for personalization.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">📱</div>
+                    <h3>AWS SNS</h3>
+                    <p>Simple Notification Service delivering targeted campaigns across email, SMS, and push notifications to customers instantly.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">🔐</div>
+                    <h3>AWS IAM</h3>
+                    <p>Identity and Access Management ensuring secure access control for marketing managers, data analysts, and platform administrators.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why AWS Section -->
+        <section class="section">
+            <h2>❓ Why AWS?</h2>
+            <div class="why-aws-points">
+                <div class="aws-point">
+                    <h4>🌍 Global Scale</h4>
+                    <p>AWS infrastructure spans 30+ regions worldwide, ensuring low-latency delivery of personalized campaigns globally.</p>
+                </div>
+                <div class="aws-point">
+                    <h4>⚡ High Performance</h4>
+                    <p>EC2 instances deliver sub-second model inference for real-time personalization at enterprise scale.</p>
+                </div>
+                <div class="aws-point">
+                    <h4>💰 Cost Effective</h4>
+                    <p>Pay-as-you-go pricing with auto-scaling ensures optimal cost/performance ratio for marketing workloads.</p>
+                </div>
+                <div class="aws-point">
+                    <h4>🔒 Enterprise Security</h4>
+                    <p>IAM, encryption, and compliance certifications protect sensitive customer data with military-grade security.</p>
+                </div>
+                <div class="aws-point">
+                    <h4>🚀 Proven Reliability</h4>
+                    <p>99.99% uptime SLA ensures campaigns are delivered without interruption, 24/7/365.</p>
+                </div>
+                <div class="aws-point">
+                    <h4>📈 ML Leadership</h4>
+                    <p>AWS leads AI/ML innovation with purpose-built services accelerating time-to-market.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p><strong>&copy; 2026 AWS AI-Driven Personalized Marketing Platform.</strong> All rights reserved.</p>
+            <p>Built with AWS Cloud Services | Enterprise-grade AI Marketing Solution</p>
+        </div>
+    </footer>
+
+    <script>
+        // Highlight active nav link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            if (link.href === window.location.href || link.getAttribute('href') === 'about.html') {
+                link.classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>
