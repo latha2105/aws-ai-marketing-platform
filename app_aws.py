@@ -118,7 +118,7 @@ def login_submit():
     if user and check_password_hash(user["password"], password):
         session["user_email"] = email
         session["role"] = "user"
-        return redirect(url_for("home"))
+        return redirect(url_for("index"))
 
     admin = ADMIN_TABLE.get_item(Key={"email": email}).get("Item")
     if admin and check_password_hash(admin["password"], password):
@@ -204,3 +204,4 @@ def logout():
 # ---------------- RUN APP ---------------- #
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
